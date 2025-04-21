@@ -1,0 +1,5 @@
+{
+  "itemGroup.in_world_recipe": "Example Mod Tab",
+  "block.in_world_recipe.example_block": "Example Block",
+  "item.in_world_recipe.example_item": "Example Item"
+}

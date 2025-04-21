@@ -1,0 +1,14 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "dev.dubhe.recipe.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "refmap": "in_world_recipe.refmap.json",
+  "mixins": [
+  ],
+  "client": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
