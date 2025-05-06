@@ -152,7 +152,7 @@ public class InWorldRecipe implements Recipe<InWorldRecipeContext>, IPrioritized
             int outcomesSize = buf.readVarInt();
             for (int i = 0; i < outcomesSize; i++) {
                 ResourceLocation location = buf.readResourceLocation();
-                IRecipeOutcomeType<?> type = ModRegistries.OUTCOME_TYPE_REGISTRY.get(location);
+                IRecipeOutcome.Type<?> type = ModRegistries.OUTCOME_TYPE_REGISTRY.get(location);
                 if (type == null) throw new IllegalArgumentException("Unknown outcome type: " + location);
                 IRecipeOutcome<?> outcome = type.getSerializer().streamCodec().decode(buf);
                 outcomes.add(outcome);
@@ -175,7 +175,7 @@ public class InWorldRecipe implements Recipe<InWorldRecipeContext>, IPrioritized
             List<IRecipePredicate<?>> predicates = new ArrayList<>(size);
             for (int i = 0; i < size; i++) {
                 ResourceLocation location = buf.readResourceLocation();
-                IRecipePredicateType<?> type = ModRegistries.PREDICATE_TYPE_REGISTRY.get(location);
+                IRecipePredicate.Type<?> type = ModRegistries.PREDICATE_TYPE_REGISTRY.get(location);
                 if (type == null) throw new IllegalArgumentException("Unknown predicate type: " + location);
                 IRecipePredicate<?> predicate = type.getSerializer().streamCodec().decode(buf);
                 predicates.add(predicate);

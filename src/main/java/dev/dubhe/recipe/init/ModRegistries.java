@@ -1,8 +1,8 @@
 package dev.dubhe.recipe.init;
 
 import dev.dubhe.recipe.InWorldRecipeSystem;
-import dev.dubhe.recipe.recipe.IRecipeOutcomeType;
-import dev.dubhe.recipe.recipe.IRecipePredicateType;
+import dev.dubhe.recipe.recipe.IRecipeOutcome;
+import dev.dubhe.recipe.recipe.IRecipePredicate;
 import dev.dubhe.recipe.recipe.IRecipeTrigger;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
@@ -22,18 +22,18 @@ public class ModRegistries {
         .maxId(512)
         .create();
 
-    public static final ResourceKey<Registry<IRecipeOutcomeType<?>>> OUTCOME_KEY = ResourceKey.createRegistryKey(
+    public static final ResourceKey<Registry<IRecipeOutcome.Type<?>>> OUTCOME_KEY = ResourceKey.createRegistryKey(
         InWorldRecipeSystem.of("outcome")
     );
-    public static final Registry<IRecipeOutcomeType<?>> OUTCOME_TYPE_REGISTRY = new RegistryBuilder<>(OUTCOME_KEY)
+    public static final Registry<IRecipeOutcome.Type<?>> OUTCOME_TYPE_REGISTRY = new RegistryBuilder<>(OUTCOME_KEY)
         .sync(true)
         .maxId(512)
         .create();
 
-    public static final ResourceKey<Registry<IRecipePredicateType<?>>> PREDICATE_KEY = ResourceKey.createRegistryKey(
+    public static final ResourceKey<Registry<IRecipePredicate.Type<?>>> PREDICATE_KEY = ResourceKey.createRegistryKey(
         InWorldRecipeSystem.of("predicate")
     );
-    public static final Registry<IRecipePredicateType<?>> PREDICATE_TYPE_REGISTRY = new RegistryBuilder<>(PREDICATE_KEY)
+    public static final Registry<IRecipePredicate.Type<?>> PREDICATE_TYPE_REGISTRY = new RegistryBuilder<>(PREDICATE_KEY)
         .sync(true)
         .maxId(512)
         .create();

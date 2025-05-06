@@ -1,5 +1,7 @@
 package dev.dubhe.recipe.recipe;
 
+import net.minecraft.resources.ResourceLocation;
+
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -14,5 +16,15 @@ public interface IRecipePredicate<P extends IRecipePredicate<P>> extends Predica
     default void rollback(InWorldRecipeContext inWorldRecipeContext) {
     }
 
-    IRecipePredicateType<P> getType();
+    Type<P> getType();
+
+    interface Type<P extends IRecipePredicate<P>> {
+        ResourceLocation getId();
+
+        ISerializer<P> getSerializer();
+
+        default boolean conflict() {
+            return false;
+        }
+    }
 }
