@@ -1,6 +1,9 @@
 package dev.dubhe.recipe;
 
 import com.mojang.logging.LogUtils;
+import dev.dubhe.recipe.init.ModRecipeOutcomeTypes;
+import dev.dubhe.recipe.init.ModRecipePredicateTypes;
+import dev.dubhe.recipe.init.ModRecipeTriggers;
 import dev.dubhe.recipe.init.ModRecipeTypes;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.bus.api.IEventBus;
@@ -9,6 +12,7 @@ import net.neoforged.fml.common.Mod;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 
+@SuppressWarnings("unused")
 @Mod(InWorldRecipeSystem.MOD_ID)
 public class InWorldRecipeSystem {
     public static final String MOD_ID = "in_world_recipe";
@@ -16,6 +20,9 @@ public class InWorldRecipeSystem {
 
     public InWorldRecipeSystem(IEventBus modEventBus, ModContainer modContainer) {
         ModRecipeTypes.register(modEventBus);
+        ModRecipeTriggers.TRIGGER.register(modEventBus);
+        ModRecipePredicateTypes.PREDICATE_TYPE.register(modEventBus);
+        ModRecipeOutcomeTypes.OUTCOME_TYPE.register(modEventBus);
     }
 
     public static @NotNull ResourceLocation of(String name) {
