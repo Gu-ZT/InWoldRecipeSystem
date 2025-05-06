@@ -4,16 +4,26 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 public class InWorldRecipeManager {
-    public final Map<IRecipeTrigger, List<InWorldRecipe>> recipes = Collections.synchronizedMap(new HashMap<>());
+    public final Map<IRecipeTrigger, Set<InWorldRecipe>> recipes = Collections.synchronizedMap(new HashMap<>());
 
     public void register(@NotNull InWorldRecipe recipe) {
-        this.recipes.computeIfAbsent(
+        Set<InWorldRecipe> recipeList = this.recipes.computeIfAbsent(
             recipe.getTrigger(),
-            k -> Collections.synchronizedList(new java.util.ArrayList<>())
-        ).add(recipe);
+            k -> Collections.synchronizedSet(new TreeSet<>())
+        );
+        recipeList.add(recipe);
+    }
+
+    public void trigger(IRecipeTrigger trigger, @NotNull InWorldRecipeContext ctx) {
+        recipes.getOrDefault(trigger, Collections.emptySet()).forEach(recipe -> {
+            if (recipe.matches(ctx, ctx.getLevel())) {
+                recipe.assemble(ctx, ctx.getLevel().registryAccess());
+            }
+        });
     }
 }

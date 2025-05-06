@@ -1,5 +1,6 @@
 package dev.dubhe.recipe.recipe;
 
+import dev.dubhe.recipe.init.ModRegistries;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.function.Consumer;
@@ -18,10 +19,10 @@ public interface IRecipePredicate<P extends IRecipePredicate<P>> extends Predica
 
     Type<P> getType();
 
-    interface Type<P extends IRecipePredicate<P>> {
-        ResourceLocation getId();
-
-        ISerializer<P> getSerializer();
+    interface Type<P extends IRecipePredicate<P>> extends ISerializer<P> {
+        default ResourceLocation getId() {
+            return ModRegistries.PREDICATE_TYPE_REGISTRY.getKey(this);
+        }
 
         default boolean conflict() {
             return false;

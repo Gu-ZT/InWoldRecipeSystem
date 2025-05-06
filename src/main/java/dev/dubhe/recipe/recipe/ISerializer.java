@@ -3,9 +3,10 @@ package dev.dubhe.recipe.recipe;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
+import org.jetbrains.annotations.NotNull;
 
 public interface ISerializer<T> {
-    MapCodec<T> codec();
+    @NotNull MapCodec<T> codec();
 
-    StreamCodec<RegistryFriendlyByteBuf, T> streamCodec();
+    @NotNull StreamCodec<RegistryFriendlyByteBuf, T> streamCodec();
 }

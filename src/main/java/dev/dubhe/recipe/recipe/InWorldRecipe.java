@@ -11,6 +11,7 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
@@ -56,12 +57,15 @@ public class InWorldRecipe implements Recipe<InWorldRecipeContext>, IPrioritized
 
     @Override
     public boolean matches(@NotNull InWorldRecipeContext inWorldRecipeContext, @NotNull Level level) {
-        boolean nonConflicting = ShapelessMatcher.incompatible(this.nonConflicting, inWorldRecipeContext);
-        if (!nonConflicting) return false;
+        boolean nonConflicting = ShapelessMatcher.compatible(this.nonConflicting, inWorldRecipeContext);
+        if (!nonConflicting) {
+            return false;
+        }
         if (this.compatible) {
             return ShapelessMatcher.compatible(this.conflicting, inWorldRecipeContext);
+        } else {
+            return ShapelessMatcher.incompatible(this.conflicting, inWorldRecipeContext);
         }
-        return ShapelessMatcher.incompatible(this.conflicting, inWorldRecipeContext);
     }
 
     @Override
@@ -92,19 +96,40 @@ public class InWorldRecipe implements Recipe<InWorldRecipeContext>, IPrioritized
     public static class Serializer implements RecipeSerializer<InWorldRecipe> {
         private static final Codec<IRecipePredicate<?>> PREDICATE_CODEC = ModRegistries.PREDICATE_TYPE_REGISTRY
             .byNameCodec()
-            .dispatch(IRecipePredicate::getType, o -> o.getSerializer().codec());
+            .dispatch(IRecipePredicate::getType, ISerializer::codec);
         private static final Codec<IRecipeOutcome<?>> OUTCOME_CODEC = ModRegistries.OUTCOME_TYPE_REGISTRY
             .byNameCodec()
-            .dispatch(IRecipeOutcome::getType, o -> o.getSerializer().codec());
+            .dispatch(IRecipeOutcome::getType, ISerializer::codec);
         private static final MapCodec<InWorldRecipe> CODEC = RecordCodecBuilder.mapCodec(
             instance -> instance.group(
-                ItemStack.CODEC.fieldOf("icon").forGetter(InWorldRecipe::getIcon),
-                ModRegistries.TRIGGER_REGISTRY.byNameCodec().fieldOf("trigger").forGetter(InWorldRecipe::getTrigger),
-                PREDICATE_CODEC.listOf().fieldOf("conflicting").forGetter(InWorldRecipe::getConflicting),
-                PREDICATE_CODEC.listOf().fieldOf("non_conflicting").forGetter(InWorldRecipe::getNonConflicting),
-                OUTCOME_CODEC.listOf().fieldOf("outcomes").forGetter(InWorldRecipe::getOutcomes),
-                Codec.INT.fieldOf("priority").forGetter(InWorldRecipe::getPriority),
-                Codec.BOOL.fieldOf("compatible").forGetter(InWorldRecipe::isCompatible)
+                ItemStack.CODEC
+                    .fieldOf("icon")
+                    .orElse(Items.ANVIL.getDefaultInstance())
+                    .forGetter(InWorldRecipe::getIcon),
+                ModRegistries.TRIGGER_REGISTRY
+                    .byNameCodec()
+                    .fieldOf("trigger")
+                    .forGetter(InWorldRecipe::getTrigger),
+                PREDICATE_CODEC
+                    .listOf()
+                    .fieldOf("conflicting")
+                    .forGetter(InWorldRecipe::getConflicting),
+                PREDICATE_CODEC
+                    .listOf()
+                    .fieldOf("non_conflicting")
+                    .forGetter(InWorldRecipe::getNonConflicting),
+                OUTCOME_CODEC
+                    .listOf()
+                    .fieldOf("outcomes")
+                    .forGetter(InWorldRecipe::getOutcomes),
+                Codec.INT
+                    .fieldOf("priority")
+                    .orElse(1000)
+                    .forGetter(InWorldRecipe::getPriority),
+                Codec.BOOL
+                    .fieldOf("compatible")
+                    .orElse(true)
+                    .forGetter(InWorldRecipe::isCompatible)
             ).apply(instance, InWorldRecipe::new)
         );
 
@@ -127,17 +152,17 @@ public class InWorldRecipe implements Recipe<InWorldRecipeContext>, IPrioritized
             buf.writeVarInt(recipe.conflicting.size());
             for (IRecipePredicate<?> predicate : recipe.conflicting) {
                 buf.writeResourceLocation(predicate.getType().getId());
-                ((P) predicate).getType().getSerializer().streamCodec().encode(buf, (P) predicate);
+                ((P) predicate).getType().streamCodec().encode(buf, (P) predicate);
             }
             buf.writeVarInt(recipe.nonConflicting.size());
             for (IRecipePredicate<?> predicate : recipe.nonConflicting) {
                 buf.writeResourceLocation(predicate.getType().getId());
-                ((P) predicate).getType().getSerializer().streamCodec().encode(buf, (P) predicate);
+                ((P) predicate).getType().streamCodec().encode(buf, (P) predicate);
             }
             buf.writeVarInt(recipe.outcomes.size());
             for (IRecipeOutcome<?> outcome : recipe.outcomes) {
                 buf.writeResourceLocation(outcome.getType().getId());
-                ((O) outcome).getType().getSerializer().streamCodec().encode(buf, (O) outcome);
+                ((O) outcome).getType().streamCodec().encode(buf, (O) outcome);
             }
             buf.writeInt(recipe.priority);
             buf.writeBoolean(recipe.compatible);
@@ -154,7 +179,7 @@ public class InWorldRecipe implements Recipe<InWorldRecipeContext>, IPrioritized
                 ResourceLocation location = buf.readResourceLocation();
                 IRecipeOutcome.Type<?> type = ModRegistries.OUTCOME_TYPE_REGISTRY.get(location);
                 if (type == null) throw new IllegalArgumentException("Unknown outcome type: " + location);
-                IRecipeOutcome<?> outcome = type.getSerializer().streamCodec().decode(buf);
+                IRecipeOutcome<?> outcome = type.streamCodec().decode(buf);
                 outcomes.add(outcome);
             }
             return new InWorldRecipe(
@@ -177,7 +202,7 @@ public class InWorldRecipe implements Recipe<InWorldRecipeContext>, IPrioritized
                 ResourceLocation location = buf.readResourceLocation();
                 IRecipePredicate.Type<?> type = ModRegistries.PREDICATE_TYPE_REGISTRY.get(location);
                 if (type == null) throw new IllegalArgumentException("Unknown predicate type: " + location);
-                IRecipePredicate<?> predicate = type.getSerializer().streamCodec().decode(buf);
+                IRecipePredicate<?> predicate = type.streamCodec().decode(buf);
                 predicates.add(predicate);
             }
             return predicates;
