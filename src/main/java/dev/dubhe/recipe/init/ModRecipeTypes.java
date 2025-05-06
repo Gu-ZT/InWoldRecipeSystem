@@ -2,7 +2,6 @@ package dev.dubhe.recipe.init;
 
 import dev.dubhe.recipe.InWorldRecipeSystem;
 import dev.dubhe.recipe.recipe.InWorldRecipe;
-import dev.dubhe.recipe.recipe.InWorldRecipeSerializer;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
@@ -21,7 +20,7 @@ public class ModRecipeTypes {
     public static final DeferredHolder<RecipeType<?>, RecipeType<InWorldRecipe>> IN_WORLD_RECIPE =
         registerType("in_world_recipe");
     public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<InWorldRecipe>> IN_WORLD_RECIPE_SERIALIZER =
-        RECIPE_SERIALIZERS.register("in_world_recipe", InWorldRecipeSerializer::new);
+        RECIPE_SERIALIZERS.register("in_world_recipe", InWorldRecipe.Serializer::new);
 
     private static <T extends Recipe<?>> @NotNull DeferredHolder<RecipeType<?>, RecipeType<T>> registerType(
         @SuppressWarnings("SameParameterValue") String name
