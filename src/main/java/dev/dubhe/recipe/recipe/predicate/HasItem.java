@@ -12,14 +12,8 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.List;
 
 @Getter
 public class HasItem extends HasItemBase implements IRecipePredicate<HasItem> {
@@ -37,15 +31,7 @@ public class HasItem extends HasItemBase implements IRecipePredicate<HasItem> {
 
     @Override
     public boolean test(@NotNull InWorldRecipeContext context) {
-        Level level = context.getLevel();
-        Vec3 trans = this.getRange().scale(0.5d);
-        Vec3 start = context.getPos().add(this.getOffset()).subtract(trans);
-        Vec3 end = context.getPos().add(this.getOffset()).add(trans);
-        List<ItemEntity> entities = level.getEntities(EntityType.ITEM, new AABB(start, end), entity -> true);
-        for (ItemEntity entity : entities) {
-            if (item.test(entity.getItem())) return true;
-        }
-        return false;
+        return this.getItem(context, this.item) != null;
     }
 
     public static class Type implements IRecipePredicate.Type<HasItem> {

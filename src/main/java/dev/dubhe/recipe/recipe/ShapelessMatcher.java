@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ShapelessMatcher {
-    public static <T extends InWorldRecipeContext> boolean incompatible(@NotNull List<IRecipePredicate<?>> predicates, @NotNull T ctx) {
+    public static boolean incompatible(@NotNull List<IRecipePredicate<?>> predicates, @NotNull InWorldRecipeContext ctx) {
         for (IRecipePredicate<?> predicate : predicates) {
             if (!predicate.test(ctx)) continue;
             List<IRecipePredicate<?>> next = new ArrayList<>();
@@ -23,7 +23,7 @@ public class ShapelessMatcher {
         return false;
     }
 
-    public static <T extends InWorldRecipeContext> boolean compatible(@NotNull List<IRecipePredicate<?>> predicates, @NotNull T ctx) {
+    public static boolean compatible(@NotNull List<IRecipePredicate<?>> predicates, @NotNull InWorldRecipeContext ctx) {
         for (IRecipePredicate<?> predicate : predicates) {
             if (!predicate.test(ctx)) return false;
             ctx.push(predicate);

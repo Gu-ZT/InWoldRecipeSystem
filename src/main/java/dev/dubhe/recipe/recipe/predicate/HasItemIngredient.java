@@ -2,8 +2,11 @@ package dev.dubhe.recipe.recipe.predicate;
 
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import dev.dubhe.recipe.InWorldRecipeSystem;
+import dev.dubhe.recipe.init.ModRecipePredicateTypes;
 import dev.dubhe.recipe.recipe.IRecipePredicate;
 import dev.dubhe.recipe.recipe.InWorldRecipeContext;
+import dev.dubhe.recipe.recipe.util.ItemCache;
 import dev.dubhe.recipe.recipe.util.ItemIngredientPredicate;
 import lombok.Getter;
 import net.minecraft.nbt.NbtOps;
@@ -11,11 +14,15 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Stack;
+
 @Getter
 public class HasItemIngredient extends HasItemBase implements IRecipePredicate<HasItemIngredient> {
+    private static final ResourceLocation HAS_ITEM_INGREDIENT_OPERATION = InWorldRecipeSystem.of("has_item_ingredient_operation");
     private final ItemIngredientPredicate item;
 
     public HasItemIngredient(Vec3 offset, Vec3 range, ItemIngredientPredicate item) {
@@ -25,12 +32,51 @@ public class HasItemIngredient extends HasItemBase implements IRecipePredicate<H
 
     @Override
     public IRecipePredicate.Type<HasItemIngredient> getType() {
-        return null;
+        return ModRecipePredicateTypes.HAS_ITEM_INGREDIENT.get();
     }
 
     @Override
     public boolean test(InWorldRecipeContext context) {
-        return false;
+        ItemCache cache = this.getOrCreateItemCache(context);
+        ItemCache.ItemCacheElement element = cache.get(this.item);
+        return element != null;
+    }
+
+    @Override
+    public void snapshot(@NotNull InWorldRecipeContext context) {
+        ItemCache cache = this.getOrCreateItemCache(context);
+        ItemCache.ItemCacheElement element = cache.get(this.item);
+        if (element == null) throw new IllegalStateException();
+        Stack<Operation> stack = context.get(HAS_ITEM_INGREDIENT_OPERATION);
+        if (stack == null) {
+            stack = new Stack<>();
+            context.put(HAS_ITEM_INGREDIENT_OPERATION, stack);
+        }
+        element.getSimulate().shrink(this.item.count());
+        stack.push(new Operation(element, -this.item.count(), this));
+    }
+
+    public Operation rollbackAndReturn(@NotNull InWorldRecipeContext context) {
+        Stack<Operation> stack = context.get(HAS_ITEM_INGREDIENT_OPERATION);
+        if (stack == null) throw new IllegalStateException();
+        Operation operation = stack.pop();
+        if (operation.ingredient() != this) throw new IllegalStateException();
+        operation.element.getSimulate().grow(operation.count());
+        return operation;
+    }
+
+    @Override
+    public void rollback(@NotNull InWorldRecipeContext context) {
+        this.rollbackAndReturn(context);
+    }
+
+    @Override
+    public void accept(InWorldRecipeContext context) {
+        Operation operation = this.rollbackAndReturn(context);
+        operation.element.grow(operation.count());
+    }
+
+    public record Operation(ItemCache.ItemCacheElement element, int count, HasItemIngredient ingredient) {
     }
 
     public static class Type implements IRecipePredicate.Type<HasItemIngredient> {

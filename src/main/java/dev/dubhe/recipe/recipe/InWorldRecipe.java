@@ -56,20 +56,26 @@ public class InWorldRecipe implements Recipe<InWorldRecipeContext>, IPrioritized
     }
 
     @Override
-    public boolean matches(@NotNull InWorldRecipeContext inWorldRecipeContext, @NotNull Level level) {
-        boolean nonConflicting = ShapelessMatcher.compatible(this.nonConflicting, inWorldRecipeContext);
+    public boolean matches(@NotNull InWorldRecipeContext context, @NotNull Level level) {
+        boolean nonConflicting = ShapelessMatcher.compatible(this.nonConflicting, context);
         if (!nonConflicting) {
             return false;
         }
         if (this.compatible) {
-            return ShapelessMatcher.compatible(this.conflicting, inWorldRecipeContext);
+            return ShapelessMatcher.compatible(this.conflicting, context);
         } else {
-            return ShapelessMatcher.incompatible(this.conflicting, inWorldRecipeContext);
+            return ShapelessMatcher.incompatible(this.conflicting, context);
         }
     }
 
     @Override
-    public @NotNull ItemStack assemble(@NotNull InWorldRecipeContext inWorldRecipeContext, @NotNull HolderLookup.Provider provider) {
+    public @NotNull ItemStack assemble(@NotNull InWorldRecipeContext context, @NotNull HolderLookup.Provider provider) {
+        for (IRecipePredicate<?> predicate : context.getStack()) {
+            predicate.accept(context);
+        }
+        for (IRecipeOutcome<?> outcome : this.outcomes) {
+            outcome.accept(context);
+        }
         return this.icon.copy();
     }
 
@@ -124,7 +130,7 @@ public class InWorldRecipe implements Recipe<InWorldRecipeContext>, IPrioritized
                     .forGetter(InWorldRecipe::getOutcomes),
                 Codec.INT
                     .fieldOf("priority")
-                    .orElse(1000)
+                    .orElse(1)
                     .forGetter(InWorldRecipe::getPriority),
                 Codec.BOOL
                     .fieldOf("compatible")
