@@ -1,5 +1,6 @@
 package dev.dubhe.recipe.recipe;
 
+import dev.dubhe.recipe.InWorldRecipeSystemConfig;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
@@ -21,7 +22,13 @@ public class InWorldRecipeManager {
 
     public void trigger(IRecipeTrigger trigger, @NotNull InWorldRecipeContext ctx) {
         recipes.getOrDefault(trigger, Collections.emptySet()).forEach(recipe -> {
-            if (recipe.matches(ctx, ctx.getLevel())) {
+            boolean accept = false;
+            for (int i = 0; i < InWorldRecipeSystemConfig.maxProcessingEfficiency; i++) {
+                if (!recipe.matches(ctx, ctx.getLevel())) {
+                    if (!accept) break;
+                    return;
+                }
+                accept = true;
                 recipe.assemble(ctx, ctx.getLevel().registryAccess());
             }
         });

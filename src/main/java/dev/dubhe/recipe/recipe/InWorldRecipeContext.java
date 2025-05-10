@@ -42,13 +42,14 @@ public class InWorldRecipeContext implements RecipeInput {
         this.stack.removeLast();
     }
 
-    public <T> void put(ResourceLocation key, T value) {
-        this.data.put(key, value);
+    public <T> void put(@NotNull InWorldRecipeData<T> key, T value) {
+        this.data.put(key.location(), value);
     }
 
     @SuppressWarnings("unchecked")
-    public <T> T get(ResourceLocation key) {
-        return (T) this.data.get(key);
+    public <T> T get(@NotNull InWorldRecipeData<T> key) {
+        T value = (T) this.data.get(key.location());
+        return value != null ? value : key.defaultValue();
     }
 
     @Override

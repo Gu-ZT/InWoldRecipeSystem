@@ -1,10 +1,9 @@
-package dev.dubhe.recipe.recipe.predicate;
+package dev.dubhe.recipe.recipe.predicate.item;
 
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.dubhe.recipe.init.ModRecipePredicateTypes;
 import dev.dubhe.recipe.recipe.IRecipePredicate;
-import dev.dubhe.recipe.recipe.InWorldRecipeContext;
 import lombok.Getter;
 import net.minecraft.advancements.critereon.ItemPredicate;
 import net.minecraft.nbt.NbtOps;
@@ -16,22 +15,14 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
 @Getter
-public class HasItem extends HasItemBase implements IRecipePredicate<HasItem> {
-    private final ItemPredicate item;
-
+public class HasItem extends HasItemBase<HasItem, ItemPredicate> {
     public HasItem(Vec3 offset, Vec3 range, ItemPredicate item) {
-        super(offset, range);
-        this.item = item;
+        super(offset, range, item);
     }
 
     @Override
     public IRecipePredicate.Type<HasItem> getType() {
         return ModRecipePredicateTypes.HAS_ITEM.get();
-    }
-
-    @Override
-    public boolean test(@NotNull InWorldRecipeContext context) {
-        return this.getItem(context, this.item) != null;
     }
 
     public static class Type implements IRecipePredicate.Type<HasItem> {

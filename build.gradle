@@ -29,20 +29,32 @@ neoForge {
     }
 
     // This line is optional. Access Transformers are automatically detected
+    accessTransformers = project.files('src/main/templates/META-INF/accesstransformer.cfg')
+
+    interfaceInjectionData.from 'src/main/resources/interface_injections.json'
+
+    // This line is optional. Access Transformers are automatically detected
     // accessTransformers.add('src/main/resources/META-INF/accesstransformer.cfg')
 
     // Default run configurations.
     // These can be tweaked, removed, or duplicated as needed.
     runs {
+        var isJbr = System.getProperty('java.vm.vendor').contains('JetBrains')
+
         client {
             client()
-
+            if (isJbr) {
+                jvmArgument "-XX:+AllowEnhancedClassRedefinition"
+            }
             // Comma-separated list of namespaces to load gametests from. Empty = all namespaces.
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
         }
 
         server {
             server()
+            if (isJbr) {
+                jvmArgument "-XX:+AllowEnhancedClassRedefinition"
+            }
             programArgument '--nogui'
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
         }

@@ -1,0 +1,5 @@
+{
+  "net/minecraft/world/item/crafting/RecipeManager": [
+    "dev/dubhe/recipe/util/injector/IRecipeManager"
+  ]
+}

@@ -102,7 +102,11 @@ public class ItemCache extends HashSet<ItemCache.ItemCacheElement> {
                 int difference = newCount - stackCount;
                 balance -= difference;
                 stack.grow(difference);
-                entity.setItem(stack);
+                if (newCount <= 0) {
+                    entity.discard();
+                } else {
+                    entity.setItem(stack);
+                }
             }
             if (balance < 0) throw new IllegalStateException();
             if (balance > 0) {

@@ -1,7 +1,14 @@
-package dev.dubhe.recipe.recipe;
+package dev.dubhe.recipe.recipe.builder;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
+import dev.dubhe.recipe.recipe.IRecipeOutcome;
+import dev.dubhe.recipe.recipe.IRecipePredicate;
+import dev.dubhe.recipe.recipe.IRecipeTrigger;
+import dev.dubhe.recipe.recipe.InWorldRecipe;
+import dev.dubhe.recipe.recipe.builder.predicate.item.HasItemBuilder;
+import dev.dubhe.recipe.recipe.builder.predicate.item.HasItemIngredientBuilder;
+import dev.dubhe.recipe.recipe.outcome.DamageAnvil;
 import lombok.EqualsAndHashCode;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementRequirements;
@@ -61,8 +68,21 @@ public class InWorldRecipeBuilder implements RecipeBuilder {
         return this;
     }
 
+    public HasItemBuilder hasItem() {
+        return new HasItemBuilder(this);
+    }
+
+    public HasItemIngredientBuilder hasItemIngredient() {
+        return new HasItemIngredientBuilder(this);
+    }
+
     public InWorldRecipeBuilder out(@NotNull IRecipeOutcome<?> outcome) {
         this.outcomes.add(outcome);
+        return this;
+    }
+
+    public InWorldRecipeBuilder damageAnvil() {
+        this.outcomes.add(new DamageAnvil());
         return this;
     }
 

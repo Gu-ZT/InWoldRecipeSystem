@@ -2,8 +2,8 @@ package dev.dubhe.recipe.init;
 
 import dev.dubhe.recipe.InWorldRecipeSystem;
 import dev.dubhe.recipe.recipe.IRecipePredicate;
-import dev.dubhe.recipe.recipe.predicate.HasItem;
-import dev.dubhe.recipe.recipe.predicate.HasItemIngredient;
+import dev.dubhe.recipe.recipe.predicate.item.HasItem;
+import dev.dubhe.recipe.recipe.predicate.item.HasItemIngredient;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 

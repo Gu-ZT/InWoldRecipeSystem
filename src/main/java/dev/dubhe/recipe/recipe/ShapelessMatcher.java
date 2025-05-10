@@ -17,8 +17,8 @@ public class ShapelessMatcher {
             ctx.push(predicate);
             if (next.isEmpty()) return true;
             boolean flag = incompatible(next, ctx);
-            if (!flag) ctx.pop(predicate);
-            return flag;
+            if (flag) return true;
+            ctx.pop(predicate);
         }
         return false;
     }
