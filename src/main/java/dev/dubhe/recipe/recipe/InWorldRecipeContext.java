@@ -9,9 +9,9 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -24,7 +24,7 @@ public class InWorldRecipeContext implements RecipeInput {
     private final Entity entity;
     private final Map<ResourceLocation, Object> data = Collections.synchronizedMap(new HashMap<>());
     @Getter
-    private final List<IRecipePredicate<?>> stack = Collections.synchronizedList(new ArrayList<>());
+    private final List<IRecipePredicate<?>> stack = Collections.synchronizedList(new LinkedList<>());
 
     public InWorldRecipeContext(Level level, Vec3 pos, Entity entity) {
         this.level = level;

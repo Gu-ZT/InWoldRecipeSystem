@@ -12,7 +12,7 @@ import net.neoforged.neoforge.registries.NewRegistryEvent;
 import net.neoforged.neoforge.registries.RegistryBuilder;
 import org.jetbrains.annotations.NotNull;
 
-@EventBusSubscriber(modid = InWorldRecipeSystem.MOD_ID)
+@EventBusSubscriber(modid = InWorldRecipeSystem.MOD_ID, bus = EventBusSubscriber.Bus.MOD)
 public class ModRegistries {
     public static final ResourceKey<Registry<IRecipeTrigger>> TRIGGER_KEY = ResourceKey.createRegistryKey(
         InWorldRecipeSystem.of("trigger")

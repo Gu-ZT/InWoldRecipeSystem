@@ -18,11 +18,11 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Stack;
+import java.util.LinkedList;
 
 @Getter
 public class HasItemIngredient extends HasItemBase<HasItemIngredient, ItemIngredientPredicate> {
-    private static final InWorldRecipeData<Stack<Operation>> HAS_ITEM_INGREDIENT_OPERATION = InWorldRecipeData.of(InWorldRecipeSystem.of("has_item_ingredient_operation"));
+    private static final InWorldRecipeData<LinkedList<Operation>> HAS_ITEM_INGREDIENT_OPERATION = InWorldRecipeData.of(InWorldRecipeSystem.of("has_item_ingredient_operation"));
 
     public HasItemIngredient(Vec3 offset, Vec3 range, ItemIngredientPredicate item) {
         super(offset, range, item);
@@ -37,32 +37,30 @@ public class HasItemIngredient extends HasItemBase<HasItemIngredient, ItemIngred
     public void snapshot(@NotNull InWorldRecipeContext context) {
         ItemCache.ItemCacheElement element = this.getItem(context);
         if (element == null) throw new IllegalStateException();
-        Stack<Operation> stack = context.get(HAS_ITEM_INGREDIENT_OPERATION);
-        if (stack == null) {
-            stack = new Stack<>();
-            context.put(HAS_ITEM_INGREDIENT_OPERATION, stack);
+        LinkedList<Operation> queue = context.get(HAS_ITEM_INGREDIENT_OPERATION);
+        if (queue == null) {
+            queue = new LinkedList<>();
+            context.put(HAS_ITEM_INGREDIENT_OPERATION, queue);
         }
         element.getSimulate().shrink(this.item.count());
-        stack.push(new Operation(element, -this.item.count(), this));
-    }
-
-    public Operation rollbackAndReturn(@NotNull InWorldRecipeContext context) {
-        Stack<Operation> stack = context.get(HAS_ITEM_INGREDIENT_OPERATION);
-        if (stack == null) throw new IllegalStateException();
-        Operation operation = stack.pop();
-        if (operation.ingredient() != this) throw new IllegalStateException();
-        operation.element.getSimulate().grow(operation.count());
-        return operation;
+        queue.add(new Operation(element, this.item.count(), this));
     }
 
     @Override
     public void rollback(@NotNull InWorldRecipeContext context) {
-        this.rollbackAndReturn(context);
+        LinkedList<Operation> queue = context.get(HAS_ITEM_INGREDIENT_OPERATION);
+        if (queue == null) throw new IllegalStateException();
+        Operation operation = queue.removeLast();
+        if (operation == null || operation.ingredient() != this) throw new IllegalStateException();
+        operation.element.getSimulate().grow(operation.count());
     }
 
     @Override
-    public void accept(InWorldRecipeContext context) {
-        Operation operation = this.rollbackAndReturn(context);
+    public void accept(@NotNull InWorldRecipeContext context) {
+        LinkedList<Operation> queue = context.get(HAS_ITEM_INGREDIENT_OPERATION);
+        if (queue == null) throw new IllegalStateException();
+        Operation operation = queue.removeFirst();
+        if (operation == null || operation.ingredient() != this) throw new IllegalStateException();
         operation.element.getSimulate().grow(operation.count());
         operation.element.shrink(operation.count);
     }

@@ -3,7 +3,11 @@ package dev.dubhe.recipe.util.injector;
 import dev.dubhe.recipe.recipe.InWorldRecipeManager;
 
 public interface IRecipeManager {
-    void inWoldRecipeSystem$setInWorldRecipeManager(InWorldRecipeManager manager);
+    default void inWoldRecipeSystem$setInWorldRecipeManager(InWorldRecipeManager manager) {
+        throw new AssertionError();
+    }
 
-    InWorldRecipeManager inWoldRecipeSystem$getInWorldRecipeManager();
+    default InWorldRecipeManager inWoldRecipeSystem$getInWorldRecipeManager() {
+        throw new AssertionError();
+    }
 }

@@ -40,7 +40,9 @@ public class ItemCache extends HashSet<ItemCache.ItemCacheElement> {
                 return element;
             }
         }
-        return new ItemCacheElement(this, entity);
+        ItemCacheElement element = new ItemCacheElement(this, entity);
+        this.add(element);
+        return element;
     }
 
     public ItemCacheElement get(ItemStack entity) {

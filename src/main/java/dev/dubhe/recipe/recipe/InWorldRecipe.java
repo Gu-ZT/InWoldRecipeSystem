@@ -70,7 +70,10 @@ public class InWorldRecipe implements Recipe<InWorldRecipeContext>, IPrioritized
 
     @Override
     public @NotNull ItemStack assemble(@NotNull InWorldRecipeContext context, @NotNull HolderLookup.Provider provider) {
-        for (IRecipePredicate<?> predicate : context.getStack()) {
+        List<IRecipePredicate<?>> stack = context.getStack();
+        IRecipePredicate<?> predicate;
+        while (!stack.isEmpty()) {
+            predicate = stack.removeFirst();
             predicate.accept(context);
         }
         for (IRecipeOutcome<?> outcome : this.outcomes) {
@@ -102,10 +105,10 @@ public class InWorldRecipe implements Recipe<InWorldRecipeContext>, IPrioritized
     public static class Serializer implements RecipeSerializer<InWorldRecipe> {
         private static final Codec<IRecipePredicate<?>> PREDICATE_CODEC = ModRegistries.PREDICATE_TYPE_REGISTRY
             .byNameCodec()
-            .dispatch(IRecipePredicate::getType, ISerializer::codec);
+            .dispatch(IRecipePredicate::getType, IRecipePredicate.Type::codec);
         private static final Codec<IRecipeOutcome<?>> OUTCOME_CODEC = ModRegistries.OUTCOME_TYPE_REGISTRY
             .byNameCodec()
-            .dispatch(IRecipeOutcome::getType, ISerializer::codec);
+            .dispatch(IRecipeOutcome::getType, IRecipeOutcome.Type::codec);
         private static final MapCodec<InWorldRecipe> CODEC = RecordCodecBuilder.mapCodec(
             instance -> instance.group(
                 ItemStack.CODEC
