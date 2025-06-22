@@ -2,7 +2,7 @@ package dev.dubhe.recipe.recipe.builder.predicate.item;
 
 import dev.dubhe.recipe.recipe.builder.InWorldRecipeBuilder;
 import dev.dubhe.recipe.recipe.predicate.item.HasItem;
-import net.minecraft.advancements.critereon.ItemPredicate;
+import dev.dubhe.recipe.recipe.util.ItemPredicate;
 import net.minecraft.advancements.critereon.ItemSubPredicate;
 import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.core.component.DataComponentPredicate;
