@@ -3,11 +3,17 @@ package dev.dubhe.recipe.recipe.util;
 import dev.dubhe.recipe.init.ModTags;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderSet;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.entity.EntityTypeTest;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.items.IItemHandler;
@@ -21,6 +27,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 
@@ -46,7 +53,47 @@ public class ItemCache {
         return this.range.contains(pos, range);
     }
 
-    private static @NotNull Map.Entry<Set<ICacheElement>, Set<ICacheElement>> toElement(ItemCache itemCache, Entity entity) {
+    private static void toElement(ItemCache itemCache, IItemHandlerCache cache, Set<ICacheElement> input, Set<ICacheElement> output, Vec3 elementPos, Vec3 elementRange) {
+        IItemHandler inputHandler = cache.getInput();
+        for (int i = 0; i < inputHandler.getSlots(); i++) {
+            ItemHandlerCacheElement element = new ItemHandlerCacheElement(
+                itemCache,
+                inputHandler,
+                i,
+                elementPos,
+                elementRange
+            );
+            input.add(element);
+        }
+        IItemHandler outputHandler = cache.getOutput();
+        for (int i = 0; i < outputHandler.getSlots(); i++) {
+            ItemHandlerCacheElement element = new ItemHandlerCacheElement(
+                itemCache,
+                outputHandler,
+                i,
+                elementPos,
+                elementRange
+            );
+            output.add(element);
+        }
+    }
+
+
+    private static void toElement(ItemCache itemCache, IItemHandler handler, Set<ICacheElement> input, Set<ICacheElement> output, Vec3 elementPos, Vec3 elementRange) {
+        for (int i = 0; i < handler.getSlots(); i++) {
+            ItemHandlerCacheElement element = new ItemHandlerCacheElement(
+                itemCache,
+                handler,
+                i,
+                elementPos,
+                elementRange
+            );
+            input.add(element);
+            output.add(element);
+        }
+    }
+
+    private static @NotNull Map.Entry<Set<ICacheElement>, Set<ICacheElement>> toElement(@NotNull ItemCache itemCache, @NotNull Entity entity) {
         Set<ICacheElement> input = new HashSet<>();
         Set<ICacheElement> output = new HashSet<>();
         if (entity instanceof ItemEntity itemEntity) {
@@ -61,40 +108,36 @@ public class ItemCache {
         Vec3 elementPos = entity.position().add(0.0, yRange / 2.0, 0.0);
         Vec3 elementRange = new Vec3(minRange, minRange, minRange);
         if (entity instanceof IItemHandlerCache cache) {
-            IItemHandler inputHandler = cache.getInput();
-            for (int i = 0; i < inputHandler.getSlots(); i++) {
-                ItemHandlerCacheElement element = new ItemHandlerCacheElement(
-                    itemCache,
-                    inputHandler,
-                    i,
-                    elementPos,
-                    elementRange
-                );
-                input.add(element);
-            }
-            IItemHandler outputHandler = cache.getOutput();
-            for (int i = 0; i < outputHandler.getSlots(); i++) {
-                ItemHandlerCacheElement element = new ItemHandlerCacheElement(
-                    itemCache,
-                    outputHandler,
-                    i,
-                    elementPos,
-                    elementRange
-                );
-                output.add(element);
-            }
+            ItemCache.toElement(itemCache, cache, input, output, elementPos, elementRange);
         } else if (entity instanceof IItemHandler handler && entity.getType().is(ModTags.Entity.ITEM_CACHE)) {
-            for (int i = 0; i < handler.getSlots(); i++) {
-                ItemHandlerCacheElement element = new ItemHandlerCacheElement(
-                    itemCache,
-                    handler,
-                    i,
-                    elementPos,
-                    elementRange
-                );
-                input.add(element);
-                output.add(element);
+            ItemCache.toElement(itemCache, handler, input, output, elementPos, elementRange);
+        }
+        return Map.entry(input, output);
+    }
+
+    private static @NotNull Map.Entry<Set<ICacheElement>, Set<ICacheElement>> toElement(@NotNull ItemCache itemCache, @NotNull BlockEntity entity) {
+        Set<ICacheElement> input = new HashSet<>();
+        Set<ICacheElement> output = new HashSet<>();
+        Vec3 elementPos = entity.getBlockPos().getCenter();
+        Vec3 elementRange = new Vec3(0.5, 0.5, 0.5);
+        Predicate<BlockEntity> inTag = blockEntity -> false;
+        Optional<HolderSet.Named<BlockEntityType<?>>> holders = BuiltInRegistries.BLOCK_ENTITY_TYPE.getTag(ModTags.BlockEntity.ITEM_CACHE);
+        if (holders.isPresent()) {
+            HolderSet.Named<BlockEntityType<?>> named = holders.get();
+            List<ResourceKey<BlockEntityType<?>>> keys = new ArrayList<>();
+            for (Holder<BlockEntityType<?>> holder : named) {
+                ResourceKey<BlockEntityType<?>> key = holder.getKey();
+                keys.add(key);
             }
+            inTag = blockEntity -> {
+                Optional<ResourceKey<BlockEntityType<?>>> key = BuiltInRegistries.BLOCK_ENTITY_TYPE.getResourceKey(blockEntity.getType());
+                return key.filter(keys::contains).isPresent();
+            };
+        }
+        if (entity instanceof IItemHandlerCache cache) {
+            ItemCache.toElement(itemCache, cache, input, output, elementPos, elementRange);
+        } else if (entity instanceof IItemHandler handler && inTag.test(entity)) {
+            ItemCache.toElement(itemCache, handler, input, output, elementPos, elementRange);
         }
         return Map.entry(input, output);
     }
