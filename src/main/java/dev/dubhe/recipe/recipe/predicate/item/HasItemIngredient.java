@@ -41,8 +41,10 @@ public class HasItemIngredient extends HasItemBase<HasItemIngredient, ItemIngred
 
     @Override
     public void accept(@NotNull InWorldRecipeContext context) {
-        ItemCache.ICacheInput input = this.getItem(context);
-        input.sync();
+        context.putAcceptor(HasItemBase.ITEM_CACHE.location(), ctx -> {
+            ItemCache itemCache = ctx.get(ITEM_CACHE);
+            if (itemCache != null) itemCache.endCache();
+        });
     }
 
     public static class Type implements IRecipePredicate.Type<HasItemIngredient> {

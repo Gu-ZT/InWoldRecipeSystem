@@ -254,12 +254,6 @@ public class ItemCache {
         }
     }
 
-    public interface IItemHandlerCache {
-        IItemHandler getInput();
-
-        IItemHandler getOutput();
-    }
-
     public static abstract class AbstractCacheElement implements ICacheElement {
         protected final ItemCache cache;
         protected final ItemStack simulate;

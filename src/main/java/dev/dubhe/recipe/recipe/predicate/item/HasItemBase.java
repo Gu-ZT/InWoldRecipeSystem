@@ -13,7 +13,7 @@ import org.jetbrains.annotations.NotNull;
 
 @Getter
 public abstract class HasItemBase<T extends HasItemBase<T, P>, P extends IItemStackPredicate> implements IRecipePredicate<T> {
-    private static final InWorldRecipeData<ItemCache> ITEM_CACHE = InWorldRecipeData.of(InWorldRecipeSystem.of("item_cache"));
+    protected static final InWorldRecipeData<ItemCache> ITEM_CACHE = InWorldRecipeData.of(InWorldRecipeSystem.of("item_cache"));
     private final Vec3 offset;
     private final Vec3 range;
     protected final P item;

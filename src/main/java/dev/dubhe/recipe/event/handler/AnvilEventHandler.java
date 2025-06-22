@@ -25,5 +25,6 @@ public class AnvilEventHandler {
         manager.trigger(ModRecipeTriggers.ON_ANVIL_FALL_ON.get(), context);
         boolean damageAnvil = context.get(DamageAnvil.DAMAGE_ANVIL);
         if (!event.isDamage()) event.setDamage(damageAnvil);
+        context.accept();
     }
 }
